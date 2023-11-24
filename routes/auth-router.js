@@ -11,14 +11,12 @@ authRouter.post(
   validateBody(userValidateSchema),
   authController.register
 );
-
 authRouter.post(
   "/login",
   isEmptyBody,
   validateBody(userValidateSchema),
   authController.login
 );
-
 authRouter.post("/logout", authenticate, authController.logout);
- 
+authRouter.get('/current', authenticate, authController.current);
 export default authRouter;

@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { ctrlWrapper } from "../helpers/index.js";
-import { HttpError } from "../helpers/index.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,7 +11,8 @@ const register = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user) {
-    throw HttpError(409, "Email in use");
+    res.status(409).json({ message: "Email in use" });
+    return;
   }
   const hashPassword = await bcrypt.hash(password, 10);
   const newUser = await User.create({ ...req.body, password: hashPassword });
@@ -25,11 +25,13 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    throw HttpError(401, "Email or password invalid");
+    res.status(401).json({ message: "Email or password invalid" });
+    return;
   }
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
-    throw HttpError(401, "Email or password invalid");
+    res.status(401).json({ message: "Email or password invalid" });
+    return;
   }
   const payload = {
     id: user._id,
@@ -56,7 +58,8 @@ const logout = async (req, res) => {
   const { _id } = req.user;
     const user = await User.findByIdAndUpdate(_id, { token: "" });
     if (!user) {
-      throw HttpError(401, "Not authorized");
+      res.status(401).json({ message: "Not authorized" });
+      return;
     }
   res.status(204).json({
     message: "No Content",
@@ -64,13 +67,14 @@ const logout = async (req, res) => {
 };
 
 const getCurrent = async (req, res) => {
-  const { email } = req.user;
+  const { email, subscription } = req.user;
 if (!email) {
-      throw HttpError(401, "Not authorized");
+      res.status(401).json({ message: "Not authorized" });
+      return;
     };
   res.json({
-    email: user.email,
-    subscription: user.subscription,
+    email,
+    subscription,
   });
 };
 
@@ -78,5 +82,6 @@ export default {
   register: ctrlWrapper(register),
     login: ctrlWrapper(login),
     updateSubscription: ctrlWrapper(updateUserSubscription),
-  logout: ctrlWrapper(logout)
+  logout: ctrlWrapper(logout),
+  current: ctrlWrapper(getCurrent)
 };
