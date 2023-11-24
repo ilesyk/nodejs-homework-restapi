@@ -1,17 +1,13 @@
-const { HttpError } = require("../helpers");
-
-const validateBody = (schema) => {
+export const validateBody = (schema) => {
   const func = (req, res, next) => {
-    if (Object.keys(req.body).length === 0) {
-      next(HttpError(400, "missing fields"));
-    }
     const { error } = schema.validate(req.body);
     if (error) {
-      next(HttpError(400, error.message));
+      console.log(error);
+      res.status(400).json({ message: error.message });
+      return;
     }
     next();
   };
   return func;
 };
 
-module.exports = validateBody;
