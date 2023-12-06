@@ -5,7 +5,7 @@ import { handleSaveError, preUpdate } from "./hooks.js";
 
 const emailRegexp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-const userSchema = new Schema ({
+const userSchema = new Schema({
   password: {
     type: String,
     required: [true, "Set password for user"],
@@ -20,6 +20,7 @@ const userSchema = new Schema ({
     enum: ["starter", "pro", "business"],
     default: "starter",
   },
+  avatarURL: String,
   token: String,
 });
 
